@@ -1,29 +1,48 @@
-const mongoose = require('mongoose');
-const express = require('express');
-require('dotenv').config(); // Charger les variables d'environnement à partir du fichier .env
+const http = require('http');
+const app = require('./app');
 
-const app = express(); // Créer une nouvelle application Express
+const normalizePort = (val) => {
+  const port = parseInt(val, 10);
 
-const MONGODB_URI = process.env.MONGODB_URI; // Récupérer l'URI de la base de données MongoDB à partir des variables d'environnement
+  if (isNaN(port)) {
+    return val;
+  }
+  if (port >= 0) {
+    return port;
+  }
+  return false;
+};
+const port = normalizePort(process.env.PORT || '3000');
+app.set('port', port);
 
-// Se connecter à la base de données MongoDB
-mongoose.connect(MONGODB_URI, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-})
-.then(() => console.log('Connected to MongoDB')) // Afficher un message si la connexion à MongoDB réussit
-.catch((error) => console.log('Error connecting to MongoDB:', error)); // Afficher un message si la connexion à MongoDB échoue
+const errorHandler = (error) => {
+  if (error.syscall !== 'listen') {
+    throw error;
+  }
+  const address = server.address();
+  const bind =
+    typeof address === 'string' ? 'pipe ' + address : 'port: ' + port;
+  switch (error.code) {
+    case 'EACCES':
+      console.error(bind + ' requires elevated privileges.');
+      process.exit(1);
+      break;
+    case 'EADDRINUSE':
+      console.error(bind + ' is already in use.');
+      process.exit(1);
+      break;
+    default:
+      throw error;
+  }
+};
 
-const PORT = process.env.PORT || 3000; // Utiliser la valeur du port fournie dans les variables d'environnement ou utiliser 3000 par défaut
+const server = http.createServer(app);
 
-app.use(express.json()); // Utiliser le middleware express.json() pour analyser les corps des requêtes JSON
-
-// Importer les routes utilisateur
-const userRoutes = require('./routes/userRoutes');
-// Utiliser les routes utilisateur avec le préfixe /api/auth
-app.use('/api/auth', userRoutes);
-
-// Démarrer le serveur sur le port spécifié
-app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
+server.on('error', errorHandler);
+server.on('listening', () => {
+  const address = server.address();
+  const bind = typeof address === 'string' ? 'pipe ' + address : 'port ' + port;
+  console.log('Listening on ' + bind);
 });
+
+server.listen(port);
