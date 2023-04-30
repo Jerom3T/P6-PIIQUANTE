@@ -1,6 +1,9 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
+
+
+
 require('dotenv').config(); // Charger les variables d'environnement à partir du fichier .env
 const MONGODB_URI = process.env.MONGODB_URI; // Récupérer l'URI de la base de données MongoDB à partir des variables d'environnement
 
