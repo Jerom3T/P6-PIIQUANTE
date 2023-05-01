@@ -1,8 +1,8 @@
 const express = require('express');
 const router = express.Router();
-
 const sauceController = require('../controllers/sauceController');
 const auth = require('../middleware/auth');
+const multer = require('multer');
 
 // Routes pour les sauces
 router.post('/', auth, multer, sauceController.createSauce);

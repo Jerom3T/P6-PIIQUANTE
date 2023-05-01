@@ -1,4 +1,4 @@
-const Sauce = require('../models/Sauce');
+const Sauce = require('../models/sauce');
 const fs = require('fs');
 
 exports.createSauce = (req, res, next) => {
@@ -39,8 +39,14 @@ exports.deleteSauce = (req, res, next) => {
 
 exports.getOneSauce = (req, res, next) => {
   Sauce.findOne({ _id: req.params.id })
-    .then(sauce => res.status(200).json(sauce))
-    .catch(error => res.status(404).json({ error: 'Impossible de trouver la sauce' }));
+    .then(sauce => {
+      if (sauce) {
+        res.status(200).json(sauce);
+      } else {
+        res.status(404).json({ error: 'Impossible de trouver la sauce' });
+      }
+    })
+    .catch(error => res.status(500).json({ error: 'Impossible de trouver la sauce' }));
 };
 
 exports.getAllSauces = (req, res, next) => {
@@ -58,15 +64,33 @@ exports.likeSauce = (req, res, next) => {
         if (sauce.usersLiked.includes(userId)) {
           Sauce.updateOne({ _id: req.params.id }, {
             $inc: { likes: -1 },
-            $pull: { usersLiked: userId },
-            _id: req.params.id
+            $pull: { usersLiked: userId }
           })
             .then(() => res.status(201).json({ message: 'Like retiré !' }))
             .catch(error => res.status(400).json({ error: 'Impossible de retirer le like' }));
         } else if (sauce.usersDisliked.includes(userId)) {
           Sauce.updateOne({ _id: req.params.id }, {
             $inc: { dislikes: -1 },
-            $pull: { usersDisliked: userId },
-            _id: req.params.id
+            $pull: { usersDisliked: userId }
           })
-            .then(() =>
+            .then(() => res.status(201).json({ message: 'Dislike retiré !' }))
+            .catch(error => res.status(400).json({ error: 'Impossible de retirer le dislike' }));
+        }
+      } else if (like === 1) {
+        Sauce.updateOne({ _id: req.params.id }, {
+          $inc: { likes: 1 },
+          $push: { usersLiked: userId }
+        })
+          .then(() => res.status(201).json({ message: 'Like ajouté !' }))
+          .catch(error => res.status(400).json({ error: 'Impossible d\'ajouter le like' }));
+      } else if (like === -1) {
+        Sauce.updateOne({ _id: req.params.id }, {
+          $inc: { dislikes: 1 },
+          $push: { usersDisliked: userId }
+        })
+          .then(() => res.status(201).json({ message: 'Dislike ajouté !' }))
+          .catch(error => res.status(400).json({ error: 'Impossible d\'ajouter le dislike' }));
+      }
+    })
+    .catch(error => res.status(500).json({ error: 'Impossible de trouver la sauce' }));
+};
