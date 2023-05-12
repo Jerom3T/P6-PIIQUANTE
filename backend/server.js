@@ -1,4 +1,4 @@
-require('dotenv').config();
+require('dotenv').config(); // Chargement des variables d'environnement depuis un fichier .env
 const http = require('http');
 const app = require('./app');
 
@@ -14,7 +14,7 @@ const normalizePort = (val) => {
   return false;
 };
 
-const port = normalizePort(process.env.PORT || '3000');
+const port = normalizePort(process.env.PORT || '3000'); // Définition du port d'écoute en utilisant la variable d'environnement ou la valeur par défaut
 app.set('port', port);
 
 const errorHandler = (error) => {
@@ -38,13 +38,13 @@ const errorHandler = (error) => {
   }
 };
 
-const server = http.createServer(app);
+const server = http.createServer(app); // Création du serveur HTTP en utilisant l'application Express
 
-server.on('error', errorHandler);
+server.on('error', errorHandler); // Gestion des erreurs de démarrage du serveur
 server.on('listening', () => {
   const address = server.address();
   const bind = typeof address === 'string' ? 'pipe ' + address : 'port ' + port;
   console.log('Listening on ' + bind);
 });
 
-server.listen(port);
+server.listen(port); // Démarrage du serveur, écoute sur le port spécifié
